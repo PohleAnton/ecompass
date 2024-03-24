@@ -1,107 +1,93 @@
-
 library(shiny)
 library(ggplot2)
 
 # Define UI for application
 ui <- fluidPage(
-  # Application title
-  titlePanel("ECOmpass Revenue Calculator Final Update"),
+  titlePanel("ECOmpass Revenue Calculator"),
   sidebarLayout(
     sidebarPanel(
-      sliderInput("percentageOfUsers",
-                  "Percentage of Total Visitors:",
-                  min = 0,
-                  max = 5,
-                  value = 0.4,
-                  step = 0.1),
-      sliderInput("conversionRate",
-                  "Conversion Rate for Explorers (%):",
-                  min = 0,
-                  max = 100,
-                  value = 2),
-      sliderInput("bUsers",
-                  "Number of Businesses:",
-                  min = 0,
-                  max = 50,
-                  value = 15),
-      numericInput("bFee",
-                   "Monthly Fee for Businesses (€):",
-                   value = 50),
-      numericInput("addRevenue",
-                   "Monthly Advertisement Revenue (€):",
-                   value = 2000),
-      numericInput("numCities",
-                   "Number of Cities:",
-                   value = 1),
-      numericInput("totalCost",
-                   "Total Cost (€):",
-                   value = 10000)
-      
+      tabsetPanel(
+        id = "yearInputTabs",
+        tabPanel("Year 1", 
+                 sliderInput("percentageOfUsersY1", "Percentage of Total Visitors Year 1:", min = 0, max = 5, value = 0.4, step = 0.1),
+                 sliderInput("conversionRateY1", "Conversion Rate for Explorers Year 1 (%):", min = 0, max = 100, value = 2),
+                 sliderInput("bUsersY1", "Number of Businesses Year 1:", min = 0, max = 50, value = 15),
+                 numericInput("bFeeY1", "Monthly Fee for Businesses Year 1 (€):", value = 50),
+                 numericInput("addRevenueY1", "Monthly Advertisement Revenue Year 1 (€):", value = 2000),
+                 numericInput("numCitiesY1", "Number of Cities Year 1:", value = 1),
+                 numericInput("totalCostY1", "Total Cost Year 1 (€):", value = 10000)
+        ),
+        tabPanel("Year 2", 
+                 sliderInput("percentageOfUsersY2", "Percentage of Total Visitors Year 2:", min = 0, max = 5, value = 0.4, step = 0.1),
+                 sliderInput("conversionRateY2", "Conversion Rate for Explorers Year 2 (%):", min = 0, max = 100, value = 2),
+                 sliderInput("bUsersY2", "Number of Businesses Year 2:", min = 0, max = 50, value = 15),
+                 numericInput("bFeeY2", "Monthly Fee for Businesses Year 2 (€):", value = 50),
+                 numericInput("addRevenueY2", "Monthly Advertisement Revenue Year 2 (€):", value = 2000),
+                 numericInput("numCitiesY2", "Number of Cities Year 2:", value = 0),
+                 numericInput("totalCostY2", "Total Cost Year 2 (€):", value = 10000)
+        ),
+        tabPanel("Year 3", 
+                 sliderInput("percentageOfUsersY3", "Percentage of Total Visitors Year 3", min = 0, max = 5, value = 0.4, step = 0.1),
+                 sliderInput("conversionRateY3", "Conversion Rate for Explorers Year 3 (%):", min = 0, max = 100, value = 2),
+                 sliderInput("bUsersY3", "Number of Businesses Year 3:", min = 0, max = 50, value = 15),
+                 numericInput("bFeeY3", "Monthly Fee for Businesses Year 3 (€):", value = 50),
+                 numericInput("addRevenueY3", "Monthly Advertisement Revenue Year 3 (€):", value = 2000),
+                 numericInput("numCitiesY3", "Number of Cities Year 3:", value = 0),
+                 numericInput("totalCostY3", "Total Cost Year 3 (€):", value = 10000)
+        )
+     
+      )
     ),
     mainPanel(
-      plotOutput("revenuePlot"),
-      plotOutput("profitPlot")
-      
+      tabsetPanel(
+        id = "yearOutputTabs",
+        tabPanel("Year 1 Revenue", plotOutput("revenuePlotY1")),
+        tabPanel("Year 2 Revenue", plotOutput("revenuePlotY2")),
+        tabPanel("Year 3 Revenue", plotOutput("revenuePlotY3"))
+      )
     )
   )
 )
 
-
 server <- function(input, output) {
-  output$revenuePlot <- renderPlot({
-    #note: i am using 2.7 million here to roughly account for the local population as well
-    aUsers <- 2700000 * (input$percentageOfUsers / 100) * (input$conversionRate / 100)
-    aRevenue <- round(aUsers * 3.99 * 12) * input$numCities
-    bRevenue <- round(input$bUsers * input$bFee * 12) * input$numCities
-    adRevenue <- round(input$addRevenue * 12) * input$numCities
-    totalRevenue <- aRevenue + bRevenue + adRevenue
+  
+  renderRevenuePlotForYear <- function(year) {
+    renderPlot({
+      percentageOfUsers <- input[[paste0("percentageOfUsersY", year)]]
+      conversionRate <- input[[paste0("conversionRateY", year)]]
+      bUsers <- input[[paste0("bUsersY", year)]]
+      bFee <- input[[paste0("bFeeY", year)]]
+      addRevenue <- input[[paste0("addRevenueY", year)]]
+      numCities <- input[[paste0("numCitiesY", year)]]
+      totalCost <- input[[paste0("totalCostY", year)]]
+      
+      aUsers <- 2700000 * (percentageOfUsers / 100) * (conversionRate / 100)
+      aRevenue <- round(aUsers * 3.99 * 12) * numCities
+      bRevenue <- round(bUsers * bFee * 12) * numCities
+      adRevenue <- round(addRevenue * 12) * numCities
+      totalRevenue <- aRevenue + bRevenue + adRevenue
+      
+      data <- data.frame(
+        Category = c("Explorers", "Partner Businesses", "Ad Revenue", "Total Revenue"),
+        Revenue = c(aRevenue, bRevenue, adRevenue, totalRevenue),
+        Type = c("Explorers", "Partner Businesses", "Ad Revenue", "Total")
+      )
+      
     
-    data <- data.frame(Category = c("Explorers", "Partner Businesses", "Ad Revenue", "Total Revenue"),
-                       Revenue = c(aRevenue, bRevenue, adRevenue, totalRevenue),
-                       Type = c("Explorers", "Partner Businesses", "Ad Revenue", "Total"))
-    
-    ggplot(data, aes(x = Category, y = Revenue, fill = Type)) +
-      geom_bar(stat = "identity") +
-      theme_minimal() +
-      scale_fill_brewer(palette = "Set3") +
-      labs(title = "Annual Revenue Breakdown per City", y = "Revenue (€)", x = NULL) +
-      geom_text(aes(label = format(round(Revenue), big.mark = ",")), 
-                position = position_stack(vjust = 0.5)) +
-      guides(fill=guide_legend(title="Revenue Source"))
-  })
-  output$profitPlot <- renderPlot({
-    # Recalculate revenues and profits with the number of cities
-    aUsers <- 2700000 * (input$percentageOfUsers / 100) * (input$conversionRate / 100)
-    aRevenue <- round(aUsers * 3.99 * 12) * input$numCities
-    bRevenue <- round(input$bUsers * input$bFee * 12) * input$numCities
-    adRevenue <- round(input$addRevenue * 12) * input$numCities
-    totalRevenue <- aRevenue + bRevenue + adRevenue
-    netProfit <- totalRevenue - input$totalCost
-    
-    # Adjust the order by setting a factor with levels in the desired order
-    financialData <- data.frame(
-      Category = factor(c("Total Cost", "Total Revenue", "Net Profit"), 
-                        levels = c("Total Cost", "Total Revenue", "Net Profit")),
-      Amount = c(-input$totalCost, totalRevenue, netProfit),
-      Type = c("Cost", "Revenue", "Profit")
-    )
-    
-    # Determine color for Net Profit based on value
-    financialData$Color <- ifelse(financialData$Category == "Net Profit" & financialData$Amount >= 0, "black", "red")
-    financialData$Color[financialData$Type == "Revenue"] <- "deepskyblue"
-    financialData$Color[financialData$Type == "Cost"] <- "orange2"
-    
-    ggplot(financialData, aes(x = Category, y = Amount, fill = Color)) +
-      geom_bar(stat = "identity", position = position_dodge()) +
-      theme_minimal() +
-      scale_fill_identity() +
-      labs(title = "Financial Overview per City", y = "Amount (€)", x = NULL) +
-      geom_text(aes(label = format(round(Amount), big.mark = ",")),
-                position = position_dodge(width = 0.9), vjust = -0.25)
-  })
+      ggplot(data, aes(x = Category, y = Revenue, fill = Type)) +
+        geom_bar(stat = "identity") +
+        theme_minimal() +
+        scale_fill_brewer(palette = "Set3") +
+        labs(title = paste("Annual Revenue Breakdown per City - Year", year), y = "Revenue (€)", x = NULL) +
+        geom_text(aes(label = format(round(Revenue), big.mark = ",")), position = position_stack(vjust = 0.5)) +
+        guides(fill=guide_legend(title="Revenue Source"))
+    })
+  }
+  
+  output$revenuePlotY1 <- renderRevenuePlotForYear(1)
+  output$revenuePlotY2 <- renderRevenuePlotForYear(2)
+  output$revenuePlotY3 <- renderRevenuePlotForYear(3)
 }
 
 # Run the application
 shinyApp(ui = ui, server = server)
-
-
