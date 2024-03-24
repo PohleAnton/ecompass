@@ -12,6 +12,7 @@ ui <- fluidPage(
                  sliderInput("percentageOfUsersY1", "Percentage of Total Visitors Year 1:", min = 0, max = 5, value = 0.4, step = 0.1),
                  sliderInput("conversionRateY1", "Conversion Rate for Explorers Year 1 (%):", min = 0, max = 100, value = 2),
                  sliderInput("bUsersY1", "Number of Businesses Year 1:", min = 0, max = 50, value = 1),
+                 numericInput("aFeeY1","Monthly Fee For Travelers Year 1 (€):", value = 3.99 ),
                  numericInput("bFeeY1", "Monthly Fee for Businesses Year 1 (€):", value = 50),
                  numericInput("addRevenueY1", "Monthly Advertisement Revenue Year 1 (€):", value = 2000),
                  numericInput("numCitiesY1", "Number of Cities Year 1:", value = 1),
@@ -21,6 +22,7 @@ ui <- fluidPage(
                  sliderInput("percentageOfUsersY2", "Percentage of Total Visitors Year 2:", min = 0, max = 5, value = 0.4, step = 0.1),
                  sliderInput("conversionRateY2", "Conversion Rate for Explorers Year 2 (%):", min = 0, max = 100, value = 2),
                  sliderInput("bUsersY2", "Number of Businesses Year 2:", min = 0, max = 50, value = 1),
+                 numericInput("aFeeY2","Monthly Fee For Travelers Year 2 (€):", value = 3.99 ),
                  numericInput("bFeeY2", "Monthly Fee for Businesses Year 2 (€):", value = 50),
                  numericInput("addRevenueY2", "Monthly Advertisement Revenue Year 2 (€):", value = 2000),
                  numericInput("numCitiesY2", "Number of Cities Year 2:", value = 0),
@@ -30,6 +32,7 @@ ui <- fluidPage(
                  sliderInput("percentageOfUsersY3", "Percentage of Total Visitors Year 3", min = 0, max = 5, value = 0.4, step = 0.1),
                  sliderInput("conversionRateY3", "Conversion Rate for Explorers Year 3 (%):", min = 0, max = 100, value = 2),
                  sliderInput("bUsersY3", "Number of Businesses Year 3:", min = 0, max = 50, value = 1),
+                 numericInput("aFeeY3","Monthly Fee For Travelers Year 3 (€):", value = 3.99 ),
                  numericInput("bFeeY3", "Monthly Fee for Businesses Year 3 (€):", value = 50),
                  numericInput("addRevenueY3", "Monthly Advertisement Revenue Year 3 (€):", value = 2000),
                  numericInput("numCitiesY3", "Number of Cities Year 3:", value = 0),
@@ -39,6 +42,7 @@ ui <- fluidPage(
                  sliderInput("percentageOfUsersY4", "Percentage of Total Visitors Year 4", min = 0, max = 5, value = 0.4, step = 0.1),
                  sliderInput("conversionRateY4", "Conversion Rate for Explorers Year 4 (%):", min = 0, max = 100, value = 2),
                  sliderInput("bUsersY4", "Number of Businesses Year 4:", min = 0, max = 50, value = 1),
+                 numericInput("aFeeY4","Monthly Fee For Travelers Year 4 (€):", value = 3.99 ),
                  numericInput("bFeeY4", "Monthly Fee for Businesses Year 4 (€):", value = 50),
                  numericInput("addRevenueY4", "Monthly Advertisement Revenue Year 4 (€):", value = 2000),
                  numericInput("numCitiesY4", "Number of Cities Year 4:", value = 0),
@@ -67,13 +71,14 @@ server <- function(input, output) {
       percentageOfUsers <- input[[paste0("percentageOfUsersY", year)]]
       conversionRate <- input[[paste0("conversionRateY", year)]]
       bUsers <- input[[paste0("bUsersY", year)]]
+      aFee <- input[[paste0("aFeeY", year)]]
       bFee <- input[[paste0("bFeeY", year)]]
       addRevenue <- input[[paste0("addRevenueY", year)]]
       numCities <- input[[paste0("numCitiesY", year)]]
       totalCost <- input[[paste0("totalCostY", year)]]
       #note: i am using 2.7 mllion to roughly include the local population
       aUsers <- 2700000 * (percentageOfUsers / 100) * (conversionRate / 100)
-      aRevenue <- round(aUsers * 3.99 * 12) * numCities
+      aRevenue <- round(aUsers * aFee * 12) * numCities
       bRevenue <- round(bUsers * bFee * 12) * numCities
       adRevenue <- round(addRevenue * 12) * numCities
       totalRevenue <- aRevenue + bRevenue + adRevenue
@@ -110,13 +115,14 @@ server <- function(input, output) {
       percentageOfUsers <- input[[paste0("percentageOfUsersY", year)]]
       conversionRate <- input[[paste0("conversionRateY", year)]]
       bUsers <- input[[paste0("bUsersY", year)]]
+      aFee <- input[[paste0("aFeeY", year)]]
       bFee <- input[[paste0("bFeeY", year)]]
       addRevenue <- input[[paste0("addRevenueY", year)]]
       numCities <- input[[paste0("numCitiesY", year)]]
       totalCost <- input[[paste0("totalCostY", year)]]
       
       aUsers <- 2700000 * (percentageOfUsers / 100) * (conversionRate / 100)
-      aRevenue <- round(aUsers * 3.99 * 12) * numCities
+      aRevenue <- round(aUsers * aFee * 12) * numCities
       bRevenue <- round(bUsers * bFee * 12) * numCities
       adRevenue <- round(addRevenue * 12) * numCities
       yearlyTotalRevenue <- aRevenue + bRevenue + adRevenue
