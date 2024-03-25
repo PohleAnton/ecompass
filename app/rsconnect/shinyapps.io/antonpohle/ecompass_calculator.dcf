@@ -5,6 +5,6 @@ account: antonpohle
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 11576040
-bundleId: 8412009
+bundleId: 8416239
 url: https://antonpohle.shinyapps.io/ecompass_calculator/
 version: 1
